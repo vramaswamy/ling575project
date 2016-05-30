@@ -7,6 +7,7 @@ import SocketServer
 import logging
 import cgi
 import json
+from os import curdir, sep
 
 # There are the parameters the user can search for and get information.
 # Yelp json response cotnains a lot of details, filter out the unwanted 
@@ -212,11 +213,14 @@ class myHandler(BaseHTTPRequestHandler):
 	
 	#Handler for the GET requests
 	def do_GET(self):
+		f = open(curdir + sep + self.path)
+
 		self.send_response(200)
 		self.send_header('Content-type','text/html')
 		self.end_headers()
-		# Send the html message
-		self.wfile.write("Hello World !")
+
+		self.wfile.write(f.read())
+		f.close()
 		return
 
 	def do_POST(self):
