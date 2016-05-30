@@ -5,7 +5,7 @@
 	<block>
 		  <assign name="latitude" expr="37.305547" />
 		  <assign name="longitude" expr="-121.817803" />
-		  <submit next="http://104.197.18.43:8080" namelist="latitude longitude" method = "post" />
+		  <submit next="http://104.197.18.43:8081" namelist="latitude longitude" method = "post" />
 	</block> 
 </form>
 </vxml>
