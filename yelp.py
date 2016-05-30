@@ -91,10 +91,13 @@ def parse_post_body(post_body):
 
 	parsed = json.loads(results_json_data)
 	# print json.dumps(parsed, indent=4, sort_keys=True)
-	filtered_parsed_dict = process_resulting_json(parsed)
-	print(filtered_parsed_dict)
+	filtered_businesses = process_resulting_json(parsed)
+	print(filtered_businesses)
 
-	return json.dumps(filtered_parsed_dict)
+	xml_response = prepare_xml_response(filtered_businesses)
+	print(xml_response)
+
+	return json.dumps(filtered_businesses)
 
 
 def process_resulting_json(parsed_dict):
@@ -171,6 +174,28 @@ def process_resulting_json(parsed_dict):
 
         return filtered_businesses
 
+
+def prepare_xml_response(filtered_businesses):
+	response_before_prompt = """
+							<?xml version="1.0" encoding="UTF-8"?>
+							<vxml version="2.1">
+							<form>
+							  <block>
+							      <prompt> """
+
+	restaurant_response = "I found these restaurants. "
+
+	for business in filtered_businesses:
+		restaurant_response = restaurant_response + business["name"] + "."
+
+	respomse_after_prompt = """
+							      </prompt>
+							    </block>
+							  </form>
+							</vxml>"""
+
+	concatenated_response = response_before_prompt + restaurant_response + respomse_after_prompt
+	return concatenated_response
 
 class myHandler(BaseHTTPRequestHandler):
 	
