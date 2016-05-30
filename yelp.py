@@ -193,7 +193,6 @@ def prepare_xml_response(filtered_businesses):
 							    </block>
 							  </form>
 							</vxml>
-							</xml>
 							"""
 
 	concatenated_response = response_before_prompt + restaurant_response + respomse_after_prompt
