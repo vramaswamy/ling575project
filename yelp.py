@@ -213,6 +213,8 @@ class myHandler(BaseHTTPRequestHandler):
 	
 	#Handler for the GET requests
 	def do_GET(self):
+		path_parts = self.path.split("?", 1)
+		print("Got get request for path", path_parts[0])
 		f = open(curdir + sep + self.path)
 
 		self.send_response(200)
