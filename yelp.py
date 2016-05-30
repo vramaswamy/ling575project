@@ -97,7 +97,7 @@ def parse_post_body(post_body):
 	xml_response = prepare_xml_response(filtered_businesses)
 	print(xml_response)
 
-	return json.dumps(filtered_businesses)
+	return xml_response
 
 
 def process_resulting_json(parsed_dict):
