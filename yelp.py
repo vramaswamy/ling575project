@@ -186,7 +186,7 @@ def prepare_xml_response(filtered_businesses):
 	restaurant_response = "I found these restaurants. "
 
 	for business in filtered_businesses:
-		restaurant_response = restaurant_response + business["name"] + ". "
+		restaurant_response = restaurant_response + add_to_xml(business["name"]) + ". "
 
 	respomse_after_prompt = """
 							      </prompt>
@@ -197,6 +197,16 @@ def prepare_xml_response(filtered_businesses):
 
 	concatenated_response = response_before_prompt + restaurant_response + respomse_after_prompt
 	return concatenated_response
+
+
+def add_to_xml(string):
+	replaced_string = string.replace("&", "&amp;")
+	replaced_string = replaced_string.replace("<", "&lt;")
+	replaced_string = replaced_string.replace(">", "&gt;")
+	replaced_string = replaced_string.replace("\'", "&apos;")
+	replaced_string = replaced_string.replace("\"", "&quot;")
+	return replaced_string
+
 
 class myHandler(BaseHTTPRequestHandler):
 	
