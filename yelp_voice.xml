@@ -1,6 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <vxml version="2.1">
+
+<!-- Navigation -->
+<link next="#form_Main">
+<grammar xml:lang="en-US" root ="LINKGRAM">
+   <rule id="LINKGRAM" scope="public">
+   <one-of>
+	 <item>main menu</item>
+         <item>restart</item>
+	 <item>start over</item>
+   </one-of>
+   </rule>
+</grammar>
+</link>
+
+<link next="#Exit">
+<grammar xml:lang="en-US" root ="EXITLINK">
+   <rule id="EXITLINK" scope="public">
+   <one-of>
+     <item>quit</item>
+     <item>exit</item>
+     <item>goodbye</item>
+   </one-of>
+   </rule>
+</grammar>
+</link>
+
+<!-- Plays welcome message -->
+<form id="Welcome">
+  <block>
+   <prompt>
+    Welcome to Yelp!
+   </prompt>
  
+   <goto next="#Main" />
+  </block>
+</form>
+ 
+<!-- Main Menu -->
 <form id="form_Main">
 	<block>
 		  <assign name="latitude" expr="37.305547" />
@@ -8,5 +45,17 @@
 		  <submit next="http://104.197.18.43:8081" namelist="latitude longitude" method = "post" />
 	</block> 
 </form>
+
+<!-- Quit the Program -->
+<form id="Exit">
+  <block>
+   <prompt>
+    Alright, have a nice day.
+   </prompt>
+
+   <exit />
+  </block>
+</form>
+
 </vxml>
 
