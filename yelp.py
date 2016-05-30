@@ -215,7 +215,7 @@ class myHandler(BaseHTTPRequestHandler):
 	def do_GET(self):
 		path_parts = self.path.split("?", 1)
 		print("Got get request for path", path_parts[0])
-		f = open(curdir + sep + self.path)
+		f = open(curdir + sep + path_parts[0])
 
 		self.send_response(200)
 		self.send_header('Content-type','text/html')
