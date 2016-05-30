@@ -186,13 +186,14 @@ def prepare_xml_response(filtered_businesses):
 	restaurant_response = "I found these restaurants. "
 
 	for business in filtered_businesses:
-		restaurant_response = restaurant_response + business["name"] + "."
+		restaurant_response = restaurant_response + business["name"] + ". "
 
 	respomse_after_prompt = """
 							      </prompt>
 							    </block>
 							  </form>
-							</vxml>"""
+							</vxml>
+							"""
 
 	concatenated_response = response_before_prompt + restaurant_response + respomse_after_prompt
 	return concatenated_response
