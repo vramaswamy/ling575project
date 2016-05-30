@@ -33,7 +33,7 @@
     Welcome to Yelp!
    </prompt>
  
-   <goto next="#Main" />
+   <goto next="#form_Main" />
   </block>
 </form>
  
