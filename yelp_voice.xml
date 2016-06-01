@@ -52,13 +52,13 @@
       </prompt>
 
       <nomatch count="3">
-        Okay, I'll ask you for information one piece at a time.
+        Sorry, I'm having trouble understanding so I'll ask you for information one piece at a time.
           <assign name="myInit" expr="true"/>
           <reprompt/>
       </nomatch>
 
       <noinput>
-        I did not hear anything.  Please try again.
+        I did not hear anything.  Please say what you're looking for and in what location.
         <reprompt />
       </noinput>
     </initial>

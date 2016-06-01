@@ -4,24 +4,24 @@
         xml:lang="en-US">
 
   <rule id="restaurantrule" scope="public">
-    <item repeat="0-1">  <!-- I am looking for a restaurant -->
-        <ruleref uri="#qustionbeginning"/> <tag>out.Location='';</tag>  <tag>out.Cuisine='';</tag>  <tag>out.Sort='';</tag>
-    </item>
-    <one-of repeat="0-1">
-      <item> <!-- near [redmond] -->
-        <item><ruleref uri="#locationrule"/><tag>out.Location=rules.locationrule.Location;</tag>  <tag>out.Cuisine='';</tag>  <tag>out.Sort='';</tag>  </item>
+      <item repeat="0-1">  <!-- I am looking for a restaurant -->
+          <ruleref uri="#qustionbeginning"/> <tag>out.Location='';</tag>  <tag>out.Cuisine='';</tag>  <tag>out.Sort='';</tag>
       </item>
-      <item> <!-- [indian] restaurant near [redmond] -->
-        <item><ruleref uri="#cuisinerule"/><tag>out.Cuisine=rules.cuisinerule.Cuisine;</tag></item>
-        <item><ruleref uri="#locationrule"/><tag>out.Location=rules.locationrule.Location;</tag> <tag>out.Sort='';</tag> </item>
-      </item>
-      <item> <!-- [indian] restaurant near [redmond] sort by [distance] -->
-        <item><ruleref uri="#cuisinerule"/><tag>out.Cuisine=rules.cuisinerule.Cuisine;</tag></item>
-        <item><ruleref uri="#locationrule"/><tag>out.Location=rules.locationrule.Location;</tag></item>
-        <item><ruleref uri="#sortrule"/><tag>out.Sort=rules.sortrule.Sort;</tag></item>
-      </item>
-      <!-- TODO: add more rules -->
-    </one-of>
+      <one-of repeat="0-1">
+          <item> <!-- near [redmond] -->
+              <item><ruleref uri="#locationrule"/><tag>out.Location=rules.locationrule.Location;</tag>  <tag>out.Cuisine='';</tag>  <tag>out.Sort='';</tag>  </item>
+          </item>
+          <item> <!-- [indian] restaurant near [redmond] -->
+              <item><ruleref uri="#cuisinerule"/><tag>out.Cuisine=rules.cuisinerule.Cuisine;</tag></item>
+              <item><ruleref uri="#locationrule"/><tag>out.Location=rules.locationrule.Location;</tag> <tag>out.Sort='';</tag> </item>
+          </item>
+          <item> <!-- [indian] restaurant near [redmond] sort by [distance] -->
+              <item><ruleref uri="#cuisinerule"/><tag>out.Cuisine=rules.cuisinerule.Cuisine;</tag></item>
+              <item><ruleref uri="#locationrule"/><tag>out.Location=rules.locationrule.Location;</tag></item>
+              <item><ruleref uri="#sortrule"/><tag>out.Sort=rules.sortrule.Sort;</tag></item>
+          </item>
+          <!-- TODO: add more rules -->
+      </one-of>
   </rule>
 
   <rule id="qustionbeginning" scope="public">
