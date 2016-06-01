@@ -320,6 +320,7 @@ class myHandler(BaseHTTPRequestHandler):
 		post_body = self.rfile.read(content_len)
 
 		post_response = parse_post_body(post_body)
+		post_response = post_response.encode('utf-8').strip()
 		self.send_response(200)
 		self.end_headers()
 		self.wfile.write(post_response)
