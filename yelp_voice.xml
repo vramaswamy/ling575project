@@ -44,7 +44,7 @@
   <var name="nextresult" expr="" />
   <var name="skipgrounding" expr="" />
  <form id="MainMenu">
-  <grammar src="http://104.197.18.43:8081/grammar.xml#restaurantrule" type="application/grammar-xml" root="restaurantrule" />
+  <grammar src="http://104.197.18.43:8087/spencer/spen_grammar.xml#restaurantrule" type="application/grammar-xml" root="restaurantrule" />
 
     <initial name="myInit">
       <prompt>
@@ -66,7 +66,7 @@
     <field name="Location">
        <prompt>What is the preferred location for your restaurant ?</prompt>
        <!-- Define the grammar. -->
-       <grammar src="http://104.197.18.43:8081/grammar.xml#locationrule" type="application/grammar-xml"/>
+       <grammar src="http://104.197.18.43:8087/spencer/spen_grammar.xml#locationrule" type="application/grammar-xml"/>
        <!-- The user was silent, restart the field. -->
        <noinput>
           I did not hear anything.  Please try again.
@@ -81,11 +81,11 @@
 
     <!-- TODO the next two fields are not working properly, I'll fix them later, this is only affect situation where no utterance is matching restaurantrule for 3 times-->
     <field name="Cuisine">
-      <grammar src="http://104.197.18.43:8081/grammar.xml#defaultcuisinerule" type="application/grammar-xml"/>
+      <grammar src="http://104.197.18.43:8087/spencer/spen_grammar.xml#defaultcuisinerule" type="application/grammar-xml"/>
     </field>
 
     <field name="Sort">
-      <grammar src="http://104.197.18.43:8081/grammar.xml#defaultsortrule" type="application/grammar-xml"/>
+      <grammar src="http://104.197.18.43:8087/spencer/spen_grammar.xml#defaultsortrule" type="application/grammar-xml"/>
     </field>
 
   <filled mode="all">
@@ -106,7 +106,7 @@
     <field name="Location">
        <prompt>What is the preferred location for your restaurant ?</prompt>
        <!-- Define the grammar. -->
-       <grammar src="http://104.197.18.43:8081/grammar.xml#locationrule" type="application/grammar-xml"/>
+       <grammar src="http://104.197.18.43:8087/spencer/spen_grammar.xml#locationrule" type="application/grammar-xml"/>
        <!-- The user was silent, restart the field. -->
        <noinput>
           I did not hear anything.  Please try again.
@@ -126,14 +126,14 @@
 
 <form id="SubmitQueryForm">
   <block>
-      <submit next="http://104.197.18.43:8081" namelist="location cuisine sort nextresult skipgrounding" method="post" />
+      <submit next="http://104.197.18.43:8087" namelist="location cuisine sort nextresult skipgrounding" method="post" />
   </block>
 </form>
 
 <form id="ResultOptionForm">
     <field name="NextStep">
        <prompt> <break strength="xweak" />  What do you want to do next? <break strength="xweak" />  you can say More Details About this Restaurant, Next Result, Modify Query or New Query </prompt>
-       <grammar src="http://104.197.18.43:8081/grammar.xml#nextsteprule" type="application/grammar-xml"/>
+       <grammar src="http://104.197.18.43:8087/spencer/spen_grammar.xml#nextsteprule" type="application/grammar-xml"/>
        <!-- The user was silent, restart the field. -->
        <noinput>
           I did not hear anything.  Please try again.
