@@ -277,7 +277,8 @@ def prepare_xml_response(filtered_businesses, query, skipgrounding):
 
 	respomse_after_prompt = """
 							      </prompt>
-							     <goto next=\"http://104.197.18.43:8081/yelp_voice.xml#ResultOptionForm\"/> 
+							     <goto next=\"http://""" + HOST_NAME + ":" + str(PORT_NUMBER) + \
+							"""/yelp_voice.xml#ResultOptionForm\"/>
 							    </block>
 							  </form>
 							</vxml>
