@@ -2,13 +2,13 @@
 <vxml version="2.1">
 
 <!-- Navigation -->
-<link next="#form_Main">
+<link next="#MainMenu">
 <grammar xml:lang="en-US" root ="LINKGRAM">
    <rule id="LINKGRAM" scope="public">
    <one-of>
-	 <item>main menu</item>
-         <item>restart</item>
-	 <item>start over</item>
+   <item>main menu</item>
+   <item>restart</item>
+   <item>start over</item>
    </one-of>
    </rule>
 </grammar>
@@ -33,17 +33,124 @@
     Welcome to Yelp!
    </prompt>
  
-   <goto next="#form_Main" />
+   <goto next="#MainMenu" />
   </block>
 </form>
  
 <!-- Main Menu -->
-<form id="form_Main">
-	<block>
-		  <assign name="latitude" expr="37.305547" />
-		  <assign name="longitude" expr="-121.817803" />
-		  <submit next="http://104.197.18.43:8081" namelist="latitude longitude" method = "post" />
-	</block> 
+  <var name="location" expr="" />
+  <var name="cuisine" expr="" />
+  <var name="sort" expr="" />
+  <var name="offset" expr="0" />
+ <form id="MainMenu">
+  <grammar src="http://104.197.18.43:8081/grammar.xml#restaurantrule" type="application/grammar-xml" root="restaurantrule" />
+
+    <initial name="myInit">
+      <prompt>
+        How can I help you ?
+      </prompt>
+
+      <nomatch count="3">
+        Okay, I'll ask you for information one piece at a time.
+          <assign name="myInit" expr="true"/>
+          <reprompt/>
+      </nomatch>
+
+      <noinput>
+        I did not hear anything.  Please try again.
+        <reprompt />
+      </noinput>
+    </initial>
+
+    <field name="Location">
+       <prompt>What is the preferred location for your restaurant ?</prompt>
+       <!-- Define the grammar. -->
+       <grammar src="http://104.197.18.43:8081/grammar.xml#locationrule" type="application/grammar-xml"/>
+       <!-- The user was silent, restart the field. -->
+       <noinput>
+          I did not hear anything.  Please try again.
+          <reprompt />
+       </noinput>
+       <!-- The user said something that was not defined in our grammar. -->
+       <nomatch>
+          I did not recognize that location.  Please try again.
+          <reprompt />
+       </nomatch>
+    </field>
+
+    <!-- TODO the next two fields are not working properly, I'll fix them later, this is only affect situation where no utterance is matching restaurantrule for 3 times-->
+    <field name="Cuisine">
+      <grammar src="http://104.197.18.43:8081/grammar.xml#defaultcuisinerule" type="application/grammar-xml"/>
+    </field>
+
+    <field name="Sort">
+      <grammar src="http://104.197.18.43:8081/grammar.xml#defaultsortrule" type="application/grammar-xml"/>
+    </field>
+
+  <filled mode="all">
+    <assign name="location" expr="Location" />
+    <assign name="cuisine" expr="Cuisine" />
+    <assign name="sort" expr="Sort" />
+
+    <if cond="location == ''">
+          <!-- Missing location information -->
+          <goto next="#LocationForm"/>
+       <else />
+          <goto next="#SubmitQueryForm"/>
+       </if>  
+  </filled>
+</form>
+
+<form id="LocationForm">
+    <field name="Location">
+       <prompt>What is the preferred location for your restaurant ?</prompt>
+       <!-- Define the grammar. -->
+       <grammar src="http://104.197.18.43:8081/grammar.xml#locationrule" type="application/grammar-xml"/>
+       <!-- The user was silent, restart the field. -->
+       <noinput>
+          I did not hear anything.  Please try again.
+          <reprompt />
+       </noinput>
+       <!-- The user said something that was not defined in our grammar. -->
+       <nomatch>
+          I did not recognize that location.  Please try again.
+          <reprompt />
+       </nomatch>
+    </field>
+    <filled mode="all">
+      <assign name="location" expr="Location" />
+      <goto next="#SubmitQueryForm"/>
+    </filled>
+</form>
+
+<!-- TODO: not tested yet-->
+<!-- TODO: the server should prompt something like this "the result number [offset] of your query: [cusine] restaurant near [location] Sorted by [sort]"-->
+<!-- TODO: the server response should go to ResultOptionForm -->
+<form id="SubmitQueryForm">
+  <block>
+      <submit next="http://104.197.18.43:8081" namelist="location cuisine sort offset" method = "post" />
+  </block>
+</form>
+
+<!-- TODO: not tested yet-->
+<form id="ResultOptionForm">
+    <field name="NextStep">
+       <prompt>What do you want to do next? you can say More Details, Next Result, Modify Query or New Query </prompt>
+       <!-- TODO: the grammar is not yet supported -->
+       <!-- <grammar src="http://104.197.18.43:8081/grammar.xml#nextsteprule" type="application/grammar-xml"/> -->
+       <!-- The user was silent, restart the field. -->
+       <noinput>
+          I did not hear anything.  Please try again.
+          <reprompt />
+       </noinput>
+       <!-- The user said something that was not defined in our grammar. -->
+       <nomatch>
+          I did not recognize what you said.  Please try again.
+          <reprompt />
+       </nomatch>
+    </field>
+    <filled mode="all">
+    </filled>
 </form>
 
 <!-- Quit the Program -->
@@ -58,4 +165,3 @@
 </form>
 
 </vxml>
-

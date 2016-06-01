@@ -1,0 +1,103 @@
+<?xml version= "1.0" encoding="UTF-8" ?>
+
+<grammar xmlns="http://www.w3.org/2001/06/grammar"
+        xml:lang="en-US">
+
+  <rule id="restaurantrule" scope="public">
+    <one-of>
+      <item> <!-- I am looking for a restaurant -->
+        <item><ruleref uri="#qustionbeginning"/> <tag>out.Location='';</tag>  <tag>out.Cuisine='';</tag>  <tag>out.Sort='';</tag>  </item>
+      </item>
+      <item> <!-- I am looking for a restaurant near [redmond] -->
+        <item><ruleref uri="#qustionbeginning"/></item>
+        <item><ruleref uri="#locationrule"/><tag>out.Location=rules.locationrule.Location;</tag>  <tag>out.Cuisine='';</tag>  <tag>out.Sort='';</tag>  </item>
+      </item>
+      <item> <!-- I am looking for an [indian] restaurant near [redmond] -->
+        <item><ruleref uri="#qustionbeginning"/></item>
+        <item><ruleref uri="#cuisinerule"/><tag>out.Cuisine=rules.cuisinerule.Cuisine;</tag></item>
+        <item><ruleref uri="#locationrule"/><tag>out.Location=rules.locationrule.Location;</tag> <tag>out.Sort='';</tag> </item>
+      </item>
+      <item> <!-- I am looking for an [indian] restaurant near [redmond] sort by [distance] -->
+        <item><ruleref uri="#qustionbeginning"/></item>
+        <item><ruleref uri="#cuisinerule"/><tag>out.Cuisine=rules.cuisinerule.Cuisine;</tag></item>
+        <item><ruleref uri="#locationrule"/><tag>out.Location=rules.locationrule.Location;</tag></item>
+        <item><ruleref uri="#sortrule"/><tag>out.Sort=rules.sortrule.Sort;</tag></item>
+      </item>
+      <!-- TODO: add more rules -->
+    </one-of>
+  </rule>
+
+  <rule id="qustionbeginning" scope="public">
+      <one-of>
+        <item> can you give me a suggestion for a restaurant </item>
+        <item> can you give me a suggestion for a </item>
+        <item> I am looking for a restaurant </item>
+        <item> I am looking for a </item>
+        <item> I am looking for an </item>
+      </one-of>
+  </rule>
+
+  <rule id="cuisinerule" scope="public">
+     <one-of>
+        <item>Indian <tag> out.Cuisine = "Indian"; </tag></item>
+        <item>Mexican <tag> out.Cuisine = "Mexican"; </tag></item>
+        <item>Thai <tag> out.Cuisine = "Thai"; </tag></item>
+        <item>Vietnamese <tag> out.Cuisine = "Vietnamese"; </tag></item>
+        <item>Any <tag> out.Cuisine = ""; </tag></item>
+     </one-of>
+     <item repeat="0-1">
+       <one-of>
+          <item>restaurant </item>
+       </one-of>
+     </item>  
+  </rule>
+
+  <rule id="locationrule" scope="public">
+    <item repeat="0-1">
+      <one-of>
+        <item> near </item>
+        <item> at </item>
+        <item> in </item>
+      </one-of>
+    </item>
+    <one-of>
+      <item>Redmond <tag> out.Location = "Redmond"; </tag>  </item>
+    </one-of>
+  </rule>
+
+  <rule id="sortrule" scope="public">
+    <item repeat="0-1">
+      <one-of>
+        <item> Sort by </item>
+      </one-of>
+    </item>
+
+     <one-of>
+        <item>Best matched <tag> out.Sort = "0"; </tag> </item>
+        <item>Distance <tag> out.Sort = "1"; </tag> </item>
+        <item>Highest Rated <tag> out.Sort = "2"; </tag> </item>
+     </one-of>
+  </rule>
+
+  <rule id="locationmissingrule" scope="public">
+    <one-of>
+        <item>
+          <ruleref uri="#locationrule"/>
+          <tag> out.LocationMissing = rules.locationrule.Location; </tag> 
+        </item>
+    </one-of>
+  </rule>
+
+  <rule id="defaultcuisinerule" scope="public">
+      <item>
+        <tag> out.Cuisine = ''; </tag> 
+      </item>
+  </rule>
+
+  <rule id="defaultsortrule" scope="public">
+      <item>
+        <tag> out.Sort = ''; </tag> 
+      </item>
+  </rule>
+
+</grammar>
