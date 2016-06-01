@@ -9,6 +9,8 @@ import cgi
 import json
 from os import curdir, sep
 
+cached_results = {}
+
 # There are the parameters the user can search for and get information.
 # Yelp json response cotnains a lot of details, filter out the unwanted 
 # and reply to voice XML with just a limited set.
@@ -40,7 +42,7 @@ def get_search_parameters(latitude, longitude, cityname, cuisine):
 		params["ll"] = "{},{}".format(latitude,longitude)
 
 	params["radius_filter"] = "2000"
-	params["limit"] = "5"
+	params["limit"] = "20"
 
 	return params
 
@@ -71,31 +73,44 @@ def parse_post_body(post_body):
 		split_pair = pair.split("=")
 		pairs_dict[split_pair[0]] = split_pair[1]
 
-	print pairs_dict
+	print(pairs_dict)
 
-	latitude = None
-	longitude = None
 	location = None
 	cuisine = None
+	offset = None
 
-	if "latitude" in pairs_dict:
-		latitude = pairs_dict["latitude"]
-	if "longitude" in pairs_dict:
-		longitude = pairs_dict["longitude"]
 	if "location" in pairs_dict:
 		location = pairs_dict["location"]
 	if "cuisine" in pairs_dict:
 		cuisine = pairs_dict["cuisine"]
+	if "offset" in pairs_dict:
+		offset = int(pairs_dict["offset"])
 
-	search_parameters = get_search_parameters(latitude, longitude, location, cuisine)
-	results_json_data = get_results(search_parameters)
+	# Are the results already cached for this location, then just reuse the results
+	global cached_results
+	filtered_businesses = None
 
-	parsed = json.loads(results_json_data)
-	# print json.dumps(parsed, indent=4, sort_keys=True)
-	filtered_businesses = process_resulting_json(parsed)
+	if location in cached_results:
+		print("Found the result for", location, "in cache")
+		filtered_businesses = cached_results[location]
+	else:
+		search_parameters = get_search_parameters(None, None, location, cuisine)
+		results_json_data = get_results(search_parameters)
+		
+		parsed = json.loads(results_json_data)
+		# print json.dumps(parsed, indent=4, sort_keys=True)
+		filtered_businesses = process_resulting_json(parsed)
+		cached_results[location] = filtered_businesses
+	
 	print(filtered_businesses)
 
-	xml_response = prepare_xml_response(filtered_businesses)
+	# If offset is given, then return only that result
+	xml_response = None
+	if offset != None:
+		xml_response = prepare_offset_xml_response(filtered_businesses[offset])
+	else:
+		xml_response = prepare_xml_response(filtered_businesses)
+
 	print(xml_response)
 
 	return xml_response
@@ -167,7 +182,7 @@ def process_resulting_json(parsed_dict):
 	        	elif acceptable_keys_values[0] == "location":
 	        		address = acceptable_keys_values[1]["address"]
 	        		city = acceptable_keys_values[1]["city"]
-	        		print address, city
+	        		print(address, city)
 	        		filtered_parsed_dict["address"] = address
 	        		filtered_parsed_dict["city"] = city
 
@@ -200,6 +215,28 @@ def prepare_xml_response(filtered_businesses):
 	return concatenated_response
 
 
+def prepare_offset_xml_response(filtered_business):
+	response_before_prompt = """
+							<?xml version="1.0" encoding="UTF-8"?>
+							<vxml version="2.1">
+							<form>
+							  <block>
+							      <prompt> """
+
+	restaurant_response = filtered_business["name"]
+
+	respomse_after_prompt = """
+							      </prompt>
+							    </block>
+							  </form>
+							</vxml>
+							"""
+
+	concatenated_response = response_before_prompt + restaurant_response + respomse_after_prompt
+	return concatenated_response
+
+
+
 def add_to_xml(string):
 	replaced_string = string.replace("&", "&amp;")
 	replaced_string = replaced_string.replace("<", "&lt;")
@@ -229,8 +266,9 @@ class myHandler(BaseHTTPRequestHandler):
 		content_len = int(self.headers.getheader('content-length', 0))
 		post_body = self.rfile.read(content_len)
 
-		print "Your name is: %s" % post_body
+		print("Your name is: ", post_body)
 		post_response = parse_post_body(post_body)
+		post_response = post_response.encode('utf-8').strip()
 		self.send_response(200)
 		self.end_headers()
 		self.wfile.write(post_response)
@@ -239,7 +277,7 @@ class myHandler(BaseHTTPRequestHandler):
 
 def main():
 	server = HTTPServer(('', PORT_NUMBER), myHandler)
-	print 'Started httpserver on port ' , PORT_NUMBER
+	print('Started httpserver on port', PORT_NUMBER)
 	
 	#Wait forever for incoming htto requests
 	server.serve_forever()
