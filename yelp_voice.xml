@@ -41,7 +41,8 @@
   <var name="location" expr="" />
   <var name="cuisine" expr="" />
   <var name="sort" expr="" />
-  <var name="offset" expr="0" />
+  <var name="nextresult" expr="" />
+  <var name="skipgrounding" expr="" />
  <form id="MainMenu">
   <grammar src="http://104.197.18.43:8081/grammar.xml#restaurantrule" type="application/grammar-xml" root="restaurantrule" />
 
@@ -123,21 +124,16 @@
     </filled>
 </form>
 
-<!-- TODO: not tested yet-->
-<!-- TODO: the server should prompt something like this "the result number [offset] of your query: [cusine] restaurant near [location] Sorted by [sort]"-->
-<!-- TODO: the server response should go to ResultOptionForm -->
 <form id="SubmitQueryForm">
   <block>
-      <submit next="http://104.197.18.43:8081" namelist="location cuisine sort offset" method = "post" />
+      <submit next="http://104.197.18.43:8081" namelist="location cuisine sort nextresult skipgrounding" method="post" />
   </block>
 </form>
 
-<!-- TODO: not tested yet-->
 <form id="ResultOptionForm">
     <field name="NextStep">
-       <prompt>What do you want to do next? you can say More Details, Next Result, Modify Query or New Query </prompt>
-       <!-- TODO: the grammar is not yet supported -->
-       <!-- <grammar src="http://104.197.18.43:8081/grammar.xml#nextsteprule" type="application/grammar-xml"/> -->
+       <prompt> <break strength="xweak" />  What do you want to do next? <break strength="xweak" />  you can say More Details About this Restaurant, Next Result, Modify Query or New Query </prompt>
+       <grammar src="http://104.197.18.43:8081/grammar.xml#nextsteprule" type="application/grammar-xml"/>
        <!-- The user was silent, restart the field. -->
        <noinput>
           I did not hear anything.  Please try again.
@@ -150,6 +146,17 @@
        </nomatch>
     </field>
     <filled mode="all">
+       <if cond="NextStep == 'moredetails'">
+
+       <elseif cond="NextStep == 'nextresult'"/>
+          <assign name="nextresult" expr="1" />
+          <assign name="skipgrounding" expr="1" />
+          <goto next="#SubmitQueryForm"/>  
+       <elseif cond="NextStep == 'modifyquery'"/>
+          
+       <elseif cond="NextStep == 'newquery'"/>
+          <goto next="#MainMenu"/>
+       </if> 
     </filled>
 </form>
 

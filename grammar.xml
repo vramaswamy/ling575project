@@ -100,4 +100,13 @@
       </item>
   </rule>
 
+    <rule id="nextsteprule" scope="public">
+      <one-of>
+        <item> More Details About this Restaurant <tag> out.NextStep = "moredetails"; </tag> </item>
+        <item> Next Result <tag> out.NextStep = "nextresult"; </tag> </item>
+        <item> Modify Query <tag> out.NextStep = "modifyquery"; </tag> </item>
+        <item> New Query <tag> out.NextStep = "newquery"; </tag> </item>
+      </one-of>
+  </rule>
+
 </grammar>

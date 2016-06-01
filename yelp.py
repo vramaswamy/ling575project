@@ -25,9 +25,41 @@ from os import curdir, sep
 HOST_NAME = '104.197.18.43' # !!!REMEMBER TO CHANGE THIS!!!
 PORT_NUMBER = 8081 # Maybe set this to 9000.
 
-def get_search_parameters(latitude, longitude, cityname, cuisine, sort, offset):
-	#See the Yelp API for more details
+Location_Cache = ""
+Cuisine_Cache = ""
+Sort_Cache = ""
+Offset_Cache = 0
+
+def get_search_parameters(latitude, longitude, cityname, cuisine, sort, nextResult):
+	global Location_Cache, Cuisine_Cache, Sort_Cache, Offset_Cache
+
+	if not nextResult: # new query should clear the cache
+		Location_Cache = ""
+		Cuisine_Cache = ""
+		Sort_Cache = ""
+		Offset_Cache = 0
+
+	print "cache values"
+	print "======="
+	print "location " + str(Location_Cache)
+	print "cuisine " + str(Cuisine_Cache)
+	print "sort "+ str(Sort_Cache)
+	print "offset " + str(Offset_Cache)
+
+	# if some parameters are none use the cache values
+	if not cityname and Location_Cache:
+		cityname = Location_Cache
+	if not cuisine  and Cuisine_Cache:
+		cuisine = Cuisine_Cache
+	if not sort and Sort_Cache:
+		sort = Sort_Cache
+
 	params = {}
+	if nextResult:
+		Offset_Cache = Offset_Cache + 1
+		params["offset"] = Offset_Cache
+
+	#See the Yelp API for more details
 	if cuisine:
 		params["term"] = cuisine + " restaurants"
 	else:
@@ -42,11 +74,13 @@ def get_search_parameters(latitude, longitude, cityname, cuisine, sort, offset):
 	if sort:
 		params["sort"] = sort
 
-	if offset:
-		params["offset"] = offset
-
 	params["radius_filter"] = "2000"
 	params["limit"] = "5"
+
+	# update cache
+	Location_Cache = cityname
+	Cuisine_Cache = cuisine
+	Sort_Cache = sort
 
 	return params
 
@@ -77,14 +111,13 @@ def parse_post_body(post_body):
 		split_pair = pair.split("=")
 		pairs_dict[split_pair[0]] = split_pair[1]
 
-	print pairs_dict
-
 	latitude = None
 	longitude = None
 	location = None
 	cuisine = None
 	sort = None
-	offset = None
+	nextresult = False
+	skipgrounding = False
 
 	if "latitude" in pairs_dict:
 		latitude = pairs_dict["latitude"]
@@ -96,28 +129,51 @@ def parse_post_body(post_body):
 		cuisine = pairs_dict["cuisine"]
 	if "sort" in pairs_dict:
 		sort = pairs_dict["sort"]
-	if "offset" in pairs_dict:
-		offset = pairs_dict["offset"]
+	if "nextresult" in pairs_dict:
+		nextresult = True
+	if "skipgrounding" in pairs_dict:
+		skipgrounding = True
 
-	search_parameters = get_search_parameters(latitude, longitude, location, cuisine, sort, offset)
+
+	search_parameters = get_search_parameters(latitude, longitude, location, cuisine, sort, nextresult)
 	results_json_data = get_results(search_parameters)
 
 	parsed = json.loads(results_json_data)
 	# print json.dumps(parsed, indent=4, sort_keys=True)
 	filtered_businesses = process_resulting_json(parsed)
-	print(filtered_businesses)
 
-	query = construct_query(pairs_dict)
-	xml_response = prepare_xml_response(filtered_businesses, query)
+	query = construct_query(search_parameters)
+	xml_response = prepare_xml_response(filtered_businesses, query, skipgrounding)
+
+	# logging
+	print "Post Body"
+	print "========="
+	print post_body
+
+	print "Search Parameters"
+	print "========="
+	print search_parameters
+
+	print "results:"
+	print "========="
+	for dic in filtered_businesses:
+		print dic["name"] 
+
+	print "xml response"
+	print "========="
 	print(xml_response)
+	print "######################"
+	print "######################"
+	print ""
 
 	return xml_response
 
 
 def construct_query(pairs_dict):
-	query = pairs_dict["cuisine"] + " restaurant in " + pairs_dict["location"]
 
-	if pairs_dict["sort"]:
+	query =  pairs_dict["term"] + " in " + pairs_dict["location"]
+
+	if pairs_dict.has_key('sort') and pairs_dict["sort"]:
 		query = query + " and you prefer the results to be sorted by " + get_sort_name(pairs_dict["sort"])
 	return query
 
@@ -186,7 +242,7 @@ def process_resulting_json(parsed_dict):
         # }
 
         parsed_businesses = parsed_dict["businesses"];
-        print(parsed_businesses)
+        #print(parsed_businesses)
 
         acceptable_keys = ["display_phone", "id", "name", "phone", "rating"]
         filtered_businesses = []
@@ -199,7 +255,6 @@ def process_resulting_json(parsed_dict):
 	        	elif acceptable_keys_values[0] == "location":
 	        		address = acceptable_keys_values[1]["address"]
 	        		city = acceptable_keys_values[1]["city"]
-	        		print address, city
 	        		filtered_parsed_dict["address"] = address
 	        		filtered_parsed_dict["city"] = city
 
@@ -208,29 +263,30 @@ def process_resulting_json(parsed_dict):
         return filtered_businesses
 
 
-def prepare_xml_response(filtered_businesses, query):
+def prepare_xml_response(filtered_businesses, query, skipgrounding):
 	response_before_prompt = """
 							<?xml version="1.0" encoding="UTF-8"?>
-							<vxml version="2.1">
+							<vxml version="2.1"  >
 							<form>
 							  <block>
 							      <prompt> """
 
 	grounding_response =  "So, You are looking for " + query 
 
-	searching_now = "<break strength=\"xweak\" />  Searching Now <break strength=\"xweak\" />"
-
-	restaurant_response =  "I found this restaurant <break strength=\"xweak\" /> " + add_to_xml(filtered_businesses[0]["name"]) 
+	restaurant_response =  "<break strength=\"xweak\" />  What about this restaurant <break strength=\"xweak\" /> " + add_to_xml(filtered_businesses[0]["name"]) 
 
 	respomse_after_prompt = """
 							      </prompt>
+							     <goto next=\"http://104.197.18.43:8081/yelp_voice.xml#ResultOptionForm\"/> 
 							    </block>
 							  </form>
 							</vxml>
 							"""
 
-	concatenated_response = response_before_prompt + grounding_response + searching_now + restaurant_response + respomse_after_prompt
-	return concatenated_response
+	if skipgrounding:
+		return response_before_prompt + restaurant_response + respomse_after_prompt
+	else:
+		return response_before_prompt + grounding_response + restaurant_response + respomse_after_prompt
 
 
 def add_to_xml(string):
@@ -262,7 +318,6 @@ class myHandler(BaseHTTPRequestHandler):
 		content_len = int(self.headers.getheader('content-length', 0))
 		post_body = self.rfile.read(content_len)
 
-		print "Your name is: %s" % post_body
 		post_response = parse_post_body(post_body)
 		self.send_response(200)
 		self.end_headers()
