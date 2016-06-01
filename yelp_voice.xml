@@ -58,7 +58,7 @@
       </nomatch>
 
       <noinput>
-        I did not hear anything.  Please say what you're looking for and in what location.
+        I didn't hear anything.  Please say what restaurants you're looking for and in what location.
         <reprompt />
       </noinput>
     </initial>
@@ -93,12 +93,12 @@
     <assign name="cuisine" expr="Cuisine" />
     <assign name="sort" expr="Sort" />
 
-    <if cond="location == ''">
+      <if cond="location == ''">
           <!-- Missing location information -->
           <goto next="#LocationForm"/>
-       <else />
+      <else />
           <goto next="#SubmitQueryForm"/>
-       </if>  
+      </if>
   </filled>
 </form>
 
