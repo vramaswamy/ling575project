@@ -32,11 +32,11 @@
    <prompt>
     Welcome to Yelp!
    </prompt>
- 
+
    <goto next="#MainMenu" />
   </block>
 </form>
- 
+
 <!-- Main Menu -->
   <var name="location" expr="" />
   <var name="cuisine" expr="" />
@@ -52,13 +52,13 @@
       </prompt>
 
       <nomatch count="3">
-        Okay, I'll ask you for information one piece at a time.
+        Sorry, I'm having trouble understanding so I'll ask you for information one piece at a time.
           <assign name="myInit" expr="true"/>
           <reprompt/>
       </nomatch>
 
       <noinput>
-        I did not hear anything.  Please try again.
+        I didn't hear anything.  Please say what restaurants you're looking for and in what location.
         <reprompt />
       </noinput>
     </initial>
@@ -93,12 +93,12 @@
     <assign name="cuisine" expr="Cuisine" />
     <assign name="sort" expr="Sort" />
 
-    <if cond="location == ''">
+      <if cond="location == ''">
           <!-- Missing location information -->
           <goto next="#LocationForm"/>
-       <else />
+      <else />
           <goto next="#SubmitQueryForm"/>
-       </if>  
+      </if>
   </filled>
 </form>
 
@@ -151,12 +151,12 @@
        <elseif cond="NextStep == 'nextresult'"/>
           <assign name="nextresult" expr="1" />
           <assign name="skipgrounding" expr="1" />
-          <goto next="#SubmitQueryForm"/>  
+          <goto next="#SubmitQueryForm"/>
        <elseif cond="NextStep == 'modifyquery'"/>
-          
+
        <elseif cond="NextStep == 'newquery'"/>
           <goto next="#MainMenu"/>
-       </if> 
+       </if>
     </filled>
 </form>
 

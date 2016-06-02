@@ -4,36 +4,33 @@
         xml:lang="en-US">
 
   <rule id="restaurantrule" scope="public">
-    <one-of>
-      <item> <!-- I am looking for a restaurant -->
-        <item><ruleref uri="#qustionbeginning"/> <tag>out.Location='';</tag>  <tag>out.Cuisine='';</tag>  <tag>out.Sort='';</tag>  </item>
+      <item>  <!-- I am looking for a restaurant -->
+          <ruleref uri="#qustionbeginning"/> <tag>out.Location='';</tag>  <tag>out.Cuisine='';</tag>  <tag>out.Sort='';</tag>
       </item>
-      <item> <!-- I am looking for a restaurant near [redmond] -->
-        <item><ruleref uri="#qustionbeginning"/></item>
-        <item><ruleref uri="#locationrule"/><tag>out.Location=rules.locationrule.Location;</tag>  <tag>out.Cuisine='';</tag>  <tag>out.Sort='';</tag>  </item>
+      <item repeat="0-3">
+          <one-of>
+              <item> <!-- [indian] restaurant -->
+                  <ruleref uri="#cuisinerule"/><tag>out.Cuisine=rules.cuisinerule.Cuisine;</tag>
+              </item>
+              <item> <!-- near [redmond] -->
+                  <ruleref uri="#locationrule"/><tag>out.Location=rules.locationrule.Location;</tag>
+              </item>
+              <item> <!-- sort by [distance] -->
+                  <ruleref uri="#sortrule"/><tag>out.Sort=rules.sortrule.Sort;</tag>
+              </item>
+              <!-- TODO: add more rules -->
+          </one-of>
       </item>
-      <item> <!-- I am looking for an [indian] restaurant near [redmond] -->
-        <item><ruleref uri="#qustionbeginning"/></item>
-        <item><ruleref uri="#cuisinerule"/><tag>out.Cuisine=rules.cuisinerule.Cuisine;</tag></item>
-        <item><ruleref uri="#locationrule"/><tag>out.Location=rules.locationrule.Location;</tag> <tag>out.Sort='';</tag> </item>
-      </item>
-      <item> <!-- I am looking for an [indian] restaurant near [redmond] sort by [distance] -->
-        <item><ruleref uri="#qustionbeginning"/></item>
-        <item><ruleref uri="#cuisinerule"/><tag>out.Cuisine=rules.cuisinerule.Cuisine;</tag></item>
-        <item><ruleref uri="#locationrule"/><tag>out.Location=rules.locationrule.Location;</tag></item>
-        <item><ruleref uri="#sortrule"/><tag>out.Sort=rules.sortrule.Sort;</tag></item>
-      </item>
-      <!-- TODO: add more rules -->
-    </one-of>
   </rule>
 
   <rule id="qustionbeginning" scope="public">
-      <one-of>
-        <item> can you give me a suggestion for a restaurant </item>
-        <item> can you give me a suggestion for a </item>
-        <item> I am looking for a restaurant </item>
-        <item> I am looking for a </item>
-        <item> I am looking for an </item>
+      <one-of repeat="0-1">
+          <item> can you give me a suggestion for a restaurant </item>
+          <item> can you give me a suggestion for a </item>
+          <item> I am looking for a restaurant </item>
+          <item> I am looking for a </item>
+          <item> I am looking for an </item>
+          <item> </item>
       </one-of>
   </rule>
 
@@ -47,7 +44,8 @@
      </one-of>
      <item repeat="0-1">
        <one-of>
-          <item>restaurant </item>
+          <item>restaurant</item>
+          <item>food</item>
        </one-of>
      </item>  
   </rule>
@@ -61,9 +59,10 @@
       </one-of>
     </item>
     <one-of>
-      <item>Redmond <tag> out.Location = "Redmond"; </tag>  </item>
-      <item>Seattle <tag> out.Location = "Seattle"; </tag>  </item>
-      <item>San Jose <tag> out.Location = "San Jose"; </tag>  </item>
+        <item>Redmond <tag> out.Location = "Redmond"; </tag>  </item>
+        <item>Seattle <tag> out.Location = "Seattle"; </tag>  </item>
+        <item>San Jose <tag> out.Location = "San Jose"; </tag>  </item>
+        <item>Kirkland <tag> out.Location = "Kirkland"; </tag>  </item>
     </one-of>
   </rule>
 
