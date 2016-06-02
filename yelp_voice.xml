@@ -32,11 +32,11 @@
    <prompt>
     Welcome to Yelp!
    </prompt>
- 
+
    <goto next="#MainMenu" />
   </block>
 </form>
- 
+
 <!-- Main Menu -->
   <var name="location" expr="" />
   <var name="cuisine" expr="" />
@@ -151,12 +151,12 @@
        <elseif cond="NextStep == 'nextresult'"/>
           <assign name="nextresult" expr="1" />
           <assign name="skipgrounding" expr="1" />
-          <goto next="#SubmitQueryForm"/>  
+          <goto next="#SubmitQueryForm"/>
        <elseif cond="NextStep == 'modifyquery'"/>
-          
+
        <elseif cond="NextStep == 'newquery'"/>
           <goto next="#MainMenu"/>
-       </if> 
+       </if>
     </filled>
 </form>
 

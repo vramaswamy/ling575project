@@ -7,18 +7,20 @@
       <item>  <!-- I am looking for a restaurant -->
           <ruleref uri="#qustionbeginning"/> <tag>out.Location='';</tag>  <tag>out.Cuisine='';</tag>  <tag>out.Sort='';</tag>
       </item>
-      <one-of repeat="0-3">
-          <item> <!-- [indian] restaurant near [redmond] -->
-              <ruleref uri="#cuisinerule"/><tag>out.Cuisine=rules.cuisinerule.Cuisine;</tag>
-          </item>
-          <item> <!-- near [redmond] -->
-              <ruleref uri="#locationrule"/><tag>out.Location=rules.locationrule.Location;</tag>
-          </item>
-          <item> <!-- [indian] restaurant near [redmond] sort by [distance] -->
-              <ruleref uri="#sortrule"/><tag>out.Sort=rules.sortrule.Sort;</tag>
-          </item>
-          <!-- TODO: add more rules -->
-      </one-of>
+      <item repeat="0-3">
+          <one-of>
+              <item> <!-- [indian] restaurant -->
+                  <ruleref uri="#cuisinerule"/><tag>out.Cuisine=rules.cuisinerule.Cuisine;</tag>
+              </item>
+              <item> <!-- near [redmond] -->
+                  <ruleref uri="#locationrule"/><tag>out.Location=rules.locationrule.Location;</tag>
+              </item>
+              <item> <!-- sort by [distance] -->
+                  <ruleref uri="#sortrule"/><tag>out.Sort=rules.sortrule.Sort;</tag>
+              </item>
+              <!-- TODO: add more rules -->
+          </one-of>
+      </item>
   </rule>
 
   <rule id="qustionbeginning" scope="public">
