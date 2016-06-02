@@ -30,10 +30,10 @@ Cuisine_Cache = ""
 Sort_Cache = ""
 Offset_Cache = 0
 
-def get_search_parameters(latitude, longitude, cityname, cuisine, sort, nextResult):
+def get_search_parameters(latitude, longitude, cityname, cuisine, sort, nextResult, moredetails):
     global Location_Cache, Cuisine_Cache, Sort_Cache, Offset_Cache
 
-    if not nextResult: # new query should clear the cache
+    if not nextResult and not moredetails: # new query should clear the cache
         Location_Cache = ""
         Cuisine_Cache = ""
         Sort_Cache = ""
@@ -57,7 +57,8 @@ def get_search_parameters(latitude, longitude, cityname, cuisine, sort, nextResu
     params = {}
     if nextResult:
         Offset_Cache = Offset_Cache + 1
-        params["offset"] = Offset_Cache
+
+    params["offset"] = Offset_Cache
 
     #See the Yelp API for more details
     if cuisine:
@@ -118,6 +119,7 @@ def parse_post_body(post_body):
     sort = None
     nextresult = False
     skipgrounding = False
+    moredetails = False
 
     if "latitude" in pairs_dict:
         latitude = pairs_dict["latitude"]
@@ -133,9 +135,11 @@ def parse_post_body(post_body):
         nextresult = True
     if "skipgrounding" in pairs_dict:
         skipgrounding = True
+    if "moredetails" in pairs_dict:
+        moredetails = True
 
 
-    search_parameters = get_search_parameters(latitude, longitude, location, cuisine, sort, nextresult)
+    search_parameters = get_search_parameters(latitude, longitude, location, cuisine, sort, nextresult, moredetails)
     results_json_data = get_results(search_parameters)
 
     parsed = json.loads(results_json_data)
@@ -143,7 +147,7 @@ def parse_post_body(post_body):
     filtered_businesses = process_resulting_json(parsed)
 
     query = construct_query(search_parameters)
-    xml_response = prepare_xml_response(filtered_businesses, query, skipgrounding)
+    xml_response = prepare_xml_response(filtered_businesses, query, skipgrounding, moredetails)
 
     # logging
     print "Post Body"
@@ -189,61 +193,10 @@ def get_sort_name(code):
     return name
 
 def process_resulting_json(parsed_dict):
-    # {
-    #     "categories": [
-    #         [
-    #             "Indian",
-    #             "indpak"
-    #         ]
-    #     ],
-    #     "display_phone": "+1-408-292-7222",
-    #     "id": "tandoori-oven-san-jose-2",
-    #     "image_url": "https://s3-media4.fl.yelpcdn.com/bphoto/OunWTteL-asypleBBfLPcA/ms.jpg",
-    #     "is_claimed": true,
-    #     "is_closed": false,
-    #     "location": {
-    #         "address": [
-    #             "150 S 1st St",
-    #             "Ste 107"
-    #         ],
-    #         "city": "San Jose",
-    #         "coordinate": {
-    #             "latitude": 37.3336334228516,
-    #             "longitude": -121.887962341309
-    #         },
-    #         "country_code": "US",
-    #         "display_address": [
-    #             "150 S 1st St",
-    #             "Ste 107",
-    #             "Downtown",
-    #             "San Jose, CA 95113"
-    #         ],
-    #         "geo_accuracy": 8.0,
-    #         "neighborhoods": [
-    #             "Downtown"
-    #         ],
-    #         "postal_code": "95113",
-    #         "state_code": "CA"
-    #     },
-    #     "menu_date_updated": 1450082133,
-    #     "menu_provider": "single_platform",
-    #     "mobile_url": "http://m.yelp.com/biz/tandoori-oven-san-jose-2?utm_campaign=yelp_api&utm_medium=api_v2_search&utm_source=H2auu1fDvBFJdx_0C8OsoA",
-    #     "name": "Tandoori Oven",
-    #     "phone": "4082927222",
-    #     "rating": 3.0,
-    #     "rating_img_url": "https://s3-media3.fl.yelpcdn.com/assets/2/www/img/34bc8086841c/ico/stars/v1/stars_3.png",
-    #     "rating_img_url_large": "https://s3-media1.fl.yelpcdn.com/assets/2/www/img/e8b5b79d37ed/ico/stars/v1/stars_large_3.png",
-    #     "rating_img_url_small": "https://s3-media3.fl.yelpcdn.com/assets/2/www/img/902abeed0983/ico/stars/v1/stars_small_3.png",
-    #     "review_count": 441,
-    #     "snippet_image_url": "http://s3-media3.fl.yelpcdn.com/photo/XO9G9J7aBH1oWv5Q8rZR2w/ms.jpg",
-    #     "snippet_text": "Food comes out fast. Prices are reasonable. The lamb korma was good but was lacking raisins and nuts. Kinda basic. Still spicy tho. The garlic naan was a...",
-    #     "url": "http://www.yelp.com/biz/tandoori-oven-san-jose-2?utm_campaign=yelp_api&utm_medium=api_v2_search&utm_source=H2auu1fDvBFJdx_0C8OsoA"
-    # }
-
     parsed_businesses = parsed_dict["businesses"]
     #print(parsed_businesses)
 
-    acceptable_keys = ["display_phone", "id", "name", "phone", "rating"]
+    acceptable_keys = ["display_phone", "id", "name", "phone", "rating", "snippet_text"]
     filtered_businesses = []
 
     for parsed_businesses_iter in parsed_businesses:
@@ -252,39 +205,59 @@ def process_resulting_json(parsed_dict):
             if acceptable_keys_values[0] in acceptable_keys:
                 filtered_parsed_dict[acceptable_keys_values[0]] = acceptable_keys_values[1]
             elif acceptable_keys_values[0] == "location":
-                address = acceptable_keys_values[1]["address"]
-                city = acceptable_keys_values[1]["city"]
-                filtered_parsed_dict["address"] = address
-                filtered_parsed_dict["city"] = city
+                display_address_list = acceptable_keys_values[1]["display_address"]
+                display_address = ""
+                for part in display_address_list:
+                    display_address = display_address + " " + part
+                filtered_parsed_dict["display_address"] = display_address.strip()
 
         filtered_businesses.append(filtered_parsed_dict)
 
     return filtered_businesses
 
 
-def prepare_xml_response(filtered_businesses, query, skipgrounding):
+def prepare_xml_response(filtered_businesses, query, skipgrounding, moredetails):
     response_before_prompt = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\
-                            <vxml version=\"2.1\"  >\
-                            <form>\
-                                <block>\
-                                    <prompt> "
-    grounding_response =  "So, You are looking for " + query
-    restaurant_response =  "<break strength=\"xweak\" />  What about this restaurant <break strength=\"xweak\" /> " + add_to_xml(filtered_businesses[0]["name"])
+                        <vxml version=\"2.1\"  >\
+                        <form>\
+                            <block>\
+                                <prompt> "
+
     respomse_after_prompt = """
-							      </prompt>
-							     <goto next=\"http://""" + HOST_NAME + ":" + str(PORT_NUMBER) + \
-							"""/yelp_voice.xml#ResultOptionForm\"/>
-							    </block>
-							  </form>
-							</vxml>
-							"""
+						      </prompt>
+						     <goto next=\"http://""" + HOST_NAME + ":" + str(PORT_NUMBER) + \
+						"""/yelp_voice.xml#ResultOptionForm\"/>
+						    </block>
+						  </form>
+						</vxml>
+						"""
+						
+    if not moredetails:
+	    grounding_response =  "So, You are looking for " + query
+	    restaurant_response =  "<break strength=\"xweak\" />  What about this restaurant <break strength=\"xweak\" /> " + add_to_xml(filtered_businesses[0]["name"])
 
-    if skipgrounding:
-        result = response_before_prompt + restaurant_response + respomse_after_prompt
-    else:
-        result = response_before_prompt + grounding_response + restaurant_response + respomse_after_prompt
+	    if skipgrounding:
+	        result = response_before_prompt + restaurant_response + respomse_after_prompt
+	    else:
+	        result = response_before_prompt + grounding_response + restaurant_response + respomse_after_prompt
 
-    return result
+	    return result
+    else: # more details 
+    	name = filtered_businesses[0]["name"]
+    	rating = filtered_businesses[0]["rating"]
+    	address = filtered_businesses[0]["display_address"]
+    	phone = format_phone(filtered_businesses[0]["phone"])
+    	snippet = filtered_businesses[0]["snippet_text"]
+
+    	prompt = add_to_xml(name) + " is located at " + address + ",  and it has customer rating of " + str(rating) + ".  Phone number is " + phone + ",  and here is a sample review about the place: <break strength=\"xweak\" /> " +  add_to_xml(snippet)
+
+    	return response_before_prompt + prompt + respomse_after_prompt
+
+def format_phone (phonenumber):
+    formatted = ""
+    for c in phonenumber:
+        formatted = formatted + " " + c
+    return formatted.strip()
 
 
 def add_to_xml(string):
@@ -332,3 +305,55 @@ def main():
     server.serve_forever()
 
 main()
+
+
+# {
+#     "categories": [
+#         [
+#             "Indian",
+#             "indpak"
+#         ]
+#     ],
+#     "display_phone": "+1-408-292-7222",
+#     "id": "tandoori-oven-san-jose-2",
+#     "image_url": "https://s3-media4.fl.yelpcdn.com/bphoto/OunWTteL-asypleBBfLPcA/ms.jpg",
+#     "is_claimed": true,
+#     "is_closed": false,
+#     "location": {
+#         "address": [
+#             "150 S 1st St",
+#             "Ste 107"
+#         ],
+#         "city": "San Jose",
+#         "coordinate": {
+#             "latitude": 37.3336334228516,
+#             "longitude": -121.887962341309
+#         },
+#         "country_code": "US",
+#         "display_address": [
+#             "150 S 1st St",
+#             "Ste 107",
+#             "Downtown",
+#             "San Jose, CA 95113"
+#         ],
+#         "geo_accuracy": 8.0,
+#         "neighborhoods": [
+#             "Downtown"
+#         ],
+#         "postal_code": "95113",
+#         "state_code": "CA"
+#     },
+#     "menu_date_updated": 1450082133,
+#     "menu_provider": "single_platform",
+#     "mobile_url": "http://m.yelp.com/biz/tandoori-oven-san-jose-2?utm_campaign=yelp_api&utm_medium=api_v2_search&utm_source=H2auu1fDvBFJdx_0C8OsoA",
+#     "name": "Tandoori Oven",
+#     "phone": "4082927222",
+#     "rating": 3.0,
+#     "rating_img_url": "https://s3-media3.fl.yelpcdn.com/assets/2/www/img/34bc8086841c/ico/stars/v1/stars_3.png",
+#     "rating_img_url_large": "https://s3-media1.fl.yelpcdn.com/assets/2/www/img/e8b5b79d37ed/ico/stars/v1/stars_large_3.png",
+#     "rating_img_url_small": "https://s3-media3.fl.yelpcdn.com/assets/2/www/img/902abeed0983/ico/stars/v1/stars_small_3.png",
+#     "review_count": 441,
+#     "snippet_image_url": "http://s3-media3.fl.yelpcdn.com/photo/XO9G9J7aBH1oWv5Q8rZR2w/ms.jpg",
+#     "snippet_text": "Food comes out fast. Prices are reasonable. The lamb korma was good but was lacking raisins and nuts. Kinda basic. Still spicy tho. The garlic naan was a...",
+#     "url": "http://www.yelp.com/biz/tandoori-oven-san-jose-2?utm_campaign=yelp_api&utm_medium=api_v2_search&utm_source=H2auu1fDvBFJdx_0C8OsoA"
+# }

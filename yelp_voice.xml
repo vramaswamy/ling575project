@@ -43,6 +43,7 @@
   <var name="sort" expr="" />
   <var name="nextresult" expr="" />
   <var name="skipgrounding" expr="" />
+  <var name="moredetails" expr="" />
  <form id="MainMenu">
   <grammar src="http://104.197.18.43:8081/grammar.xml#restaurantrule" type="application/grammar-xml" root="restaurantrule" />
 
@@ -51,7 +52,7 @@
         How can I help you ?
       </prompt>
 
-      <nomatch count="3">
+      <nomatch count="6">
         Sorry, I'm having trouble understanding so I'll ask you for information one piece at a time.
           <assign name="myInit" expr="true"/>
           <reprompt/>
@@ -126,7 +127,7 @@
 
 <form id="SubmitQueryForm">
   <block>
-      <submit next="http://104.197.18.43:8081" namelist="location cuisine sort nextresult skipgrounding" method="post" />
+      <submit next="http://104.197.18.43:8081" namelist="location cuisine sort nextresult skipgrounding moredetails" method="post" />
   </block>
 </form>
 
@@ -147,7 +148,8 @@
     </field>
     <filled mode="all">
        <if cond="NextStep == 'moredetails'">
-
+          <assign name="moredetails" expr="1" />
+          <goto next="#SubmitQueryForm"/>
        <elseif cond="NextStep == 'nextresult'"/>
           <assign name="nextresult" expr="1" />
           <assign name="skipgrounding" expr="1" />
