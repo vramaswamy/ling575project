@@ -24,6 +24,7 @@ from os import curdir, sep
 
 HOST_NAME = '104.197.18.43' # !!!REMEMBER TO CHANGE THIS!!!
 PORT_NUMBER = 8081 # Maybe set this to 9000.
+PAGE_SIZE = 3
 
 Location_Cache = ""
 Cuisine_Cache = ""
@@ -56,7 +57,7 @@ def get_search_parameters(latitude, longitude, cityname, cuisine, sort, nextResu
 
     params = {}
     if nextResult:
-        Offset_Cache = Offset_Cache + 1
+        Offset_Cache = Offset_Cache + PAGE_SIZE
 
     params["offset"] = Offset_Cache
 
@@ -120,6 +121,8 @@ def parse_post_body(post_body):
     nextresult = False
     skipgrounding = False
     moredetails = False
+    moredetailsType = None
+    moredetailsOffset = None
 
     if "latitude" in pairs_dict:
         latitude = pairs_dict["latitude"]
@@ -137,6 +140,10 @@ def parse_post_body(post_body):
         skipgrounding = True
     if "moredetails" in pairs_dict:
         moredetails = True
+    if "moredetailstype" in pairs_dict:
+        moredetailsType = pairs_dict["moredetailstype"]
+    if "moredetailsoffset" in pairs_dict:
+        moredetailsOffset = int(pairs_dict["moredetailsoffset"])
 
 
     search_parameters = get_search_parameters(latitude, longitude, location, cuisine, sort, nextresult, moredetails)
@@ -147,7 +154,7 @@ def parse_post_body(post_body):
     filtered_businesses = process_resulting_json(parsed)
 
     query = construct_query(search_parameters)
-    xml_response = prepare_xml_response(filtered_businesses, query, skipgrounding, moredetails)
+    xml_response = prepare_xml_response(filtered_businesses, query, skipgrounding, moredetails, moredetailsType, moredetailsOffset)
 
     # logging
     print "Post Body"
@@ -216,7 +223,7 @@ def process_resulting_json(parsed_dict):
     return filtered_businesses
 
 
-def prepare_xml_response(filtered_businesses, query, skipgrounding, moredetails):
+def prepare_xml_response(filtered_businesses, query, skipgrounding, moredetails, moredetailsType, moredetailsOffset):
     response_before_prompt = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\
                         <vxml version=\"2.1\"  >\
                         <form>\
@@ -234,7 +241,10 @@ def prepare_xml_response(filtered_businesses, query, skipgrounding, moredetails)
 						
     if not moredetails:
 	    grounding_response =  "So, You are looking for " + query
-	    restaurant_response =  "<break strength=\"xweak\" />  What about this restaurant <break strength=\"xweak\" /> " + add_to_xml(filtered_businesses[0]["name"])
+	    restaurant_response =  """
+	    	<break time=\"500\" /> 
+	    	What about these restaurants 
+	    	<break time=\"500\" /> One  <break time=\"500\" /> """ + add_to_xml(filtered_businesses[0]["name"]) + """<break strength=\"xweak\" />  Two  <break time=\"500\" /> """ + add_to_xml(filtered_businesses[1]["name"]) + """<break strength=\"xweak\" />  Three  <break time=\"500\" /> """ + add_to_xml(filtered_businesses[2]["name"])
 
 	    if skipgrounding:
 	        result = response_before_prompt + restaurant_response + respomse_after_prompt
@@ -243,13 +253,23 @@ def prepare_xml_response(filtered_businesses, query, skipgrounding, moredetails)
 
 	    return result
     else: # more details 
-    	name = filtered_businesses[0]["name"]
-    	rating = filtered_businesses[0]["rating"]
-    	address = filtered_businesses[0]["display_address"]
-    	phone = format_phone(filtered_businesses[0]["phone"])
-    	snippet = filtered_businesses[0]["snippet_text"]
+    	name = filtered_businesses[moredetailsOffset - 1]["name"]
+    	rating = filtered_businesses[moredetailsOffset - 1]["rating"]
+    	address = filtered_businesses[moredetailsOffset - 1]["display_address"]
+    	phone = format_phone(filtered_businesses[moredetailsOffset - 1]["phone"])
+    	snippet = filtered_businesses[moredetailsOffset - 1]["snippet_text"]
 
-    	prompt = add_to_xml(name) + " is located at " + address + ",  and it has customer rating of " + str(rating) + ".  Phone number is " + phone + ",  and here is a sample review about the place: <break strength=\"xweak\" /> " +  add_to_xml(snippet)
+    	prompt = ""
+    	if moredetailsType == "general":
+    		prompt = add_to_xml(name) + " is located at " + address + ",  and it has customer rating of " + str(rating) + ".  Phone number is " + phone + ",  and here is a sample review about the place: <break strength=\"xweak\" /> " +  add_to_xml(snippet)
+    	elif moredetailsType == "address":
+    		prompt = add_to_xml(name) + " is located at " + address
+    	elif moredetailsType == "phone":
+    		prompt = "The phone number for " + add_to_xml(name) + " is " + phone
+    	elif moredetailsType == "rating":
+    		prompt = add_to_xml(name) + " has customer rating of " + str(rating)
+    	elif moredetailsType == "review":
+    		prompt = "Here is a sample review for " + add_to_xml(name) + " <break strength=\"xweak\" /> " + add_to_xml(snippet)	
 
     	return response_before_prompt + prompt + respomse_after_prompt
 

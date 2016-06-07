@@ -44,6 +44,8 @@
   <var name="nextresult" expr="" />
   <var name="skipgrounding" expr="" />
   <var name="moredetails" expr="" />
+  <var name="moredetailstype" expr="" />
+  <var name="moredetailsoffset" expr="-1" />
  <form id="MainMenu">
   <grammar src="http://104.197.18.43:8081/grammar.xml#restaurantrule" type="application/grammar-xml" root="restaurantrule" />
 
@@ -127,35 +129,46 @@
 
 <form id="SubmitQueryForm">
   <block>
-      <submit next="http://104.197.18.43:8081" namelist="location cuisine sort nextresult skipgrounding moredetails" method="post" />
+      <submit next="http://104.197.18.43:8081" namelist="location cuisine sort nextresult skipgrounding moredetails moredetailstype moredetailsoffset" method="post" />
   </block>
 </form>
 
 <form id="ResultOptionForm">
+
+    <grammar src="http://104.197.18.43:8081/grammar.xml#nextsteprule" type="application/grammar-xml"/>
+    <initial name="myInit2">
+       <prompt> <break strength="xweak" />  What do you want to do next? <break time="500" />  You can say more details about one or you can ask questions about any restaurant like  <break time="400" /> What is the address of two, what is the phone number of three, what is the customer rating of two, or what is the customer review for one. Also you can say Next Results, or New Query </prompt>
+
+      <nomatch count="6">
+        I did not recognize what you said.  Please try again.
+          <assign name="myInit2" expr="true"/>
+          <reprompt/>
+      </nomatch>
+
+      <noinput>
+        I did not hear anything.  Please try again.
+        <reprompt />
+      </noinput>
+    </initial>
+
     <field name="NextStep">
-       <prompt> <break strength="xweak" />  What do you want to do next? <break strength="xweak" />  you can say More Details About this Restaurant, Next Result, Modify Query or New Query </prompt>
-       <grammar src="http://104.197.18.43:8081/grammar.xml#nextsteprule" type="application/grammar-xml"/>
-       <!-- The user was silent, restart the field. -->
-       <noinput>
-          I did not hear anything.  Please try again.
-          <reprompt />
-       </noinput>
-       <!-- The user said something that was not defined in our grammar. -->
-       <nomatch>
-          I did not recognize what you said.  Please try again.
-          <reprompt />
-       </nomatch>
     </field>
+    <field name="MoreDetailsType">
+    </field>
+    <field name="MoreDetailsOffset">
+    </field>
+
+
     <filled mode="all">
        <if cond="NextStep == 'moredetails'">
           <assign name="moredetails" expr="1" />
+          <assign name="moredetailstype" expr="MoreDetailsType" />
+          <assign name="moredetailsoffset" expr="MoreDetailsOffset" />
           <goto next="#SubmitQueryForm"/>
        <elseif cond="NextStep == 'nextresult'"/>
           <assign name="nextresult" expr="1" />
           <assign name="skipgrounding" expr="1" />
           <goto next="#SubmitQueryForm"/>
-       <elseif cond="NextStep == 'modifyquery'"/>
-
        <elseif cond="NextStep == 'newquery'"/>
           <goto next="#MainMenu"/>
        </if>

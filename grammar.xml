@@ -101,12 +101,42 @@
       </item>
   </rule>
 
-    <rule id="nextsteprule" scope="public">
+  <rule id="nextsteprule" scope="public">
       <one-of>
-        <item> More Details About this Restaurant <tag> out.NextStep = "moredetails"; </tag> </item>
-        <item> Next Result <tag> out.NextStep = "nextresult"; </tag> </item>
-        <item> Modify Query <tag> out.NextStep = "modifyquery"; </tag> </item>
-        <item> New Query <tag> out.NextStep = "newquery"; </tag> </item>
+        <item> 
+          More Details About <ruleref uri="#offsetrule"/> 
+          <tag> out.NextStep = "moredetails"; </tag> <tag> out.MoreDetailsType = "general"; </tag> <tag> out.MoreDetailsOffset = rules.offsetrule.MoreDetailsOffset; </tag> 
+        </item>
+        <item> 
+          What is the address of <ruleref uri="#offsetrule"/> 
+          <tag> out.NextStep = "moredetails"; </tag> <tag> out.MoreDetailsType = "address"; </tag> <tag> out.MoreDetailsOffset = rules.offsetrule.MoreDetailsOffset; </tag> 
+        </item>
+        <item> 
+          What is the phone number of <ruleref uri="#offsetrule"/> 
+          <tag> out.NextStep = "moredetails"; </tag> <tag> out.MoreDetailsType = "phone"; </tag> <tag> out.MoreDetailsOffset = rules.offsetrule.MoreDetailsOffset; </tag> 
+        </item>
+        <item> 
+          What is the customer rating of <ruleref uri="#offsetrule"/> 
+          <tag> out.NextStep = "moredetails"; </tag> <tag> out.MoreDetailsType = "rating"; </tag> <tag> out.MoreDetailsOffset = rules.offsetrule.MoreDetailsOffset; </tag> 
+        </item>
+        <item> 
+          What is the customer review for <ruleref uri="#offsetrule"/> 
+          <tag> out.NextStep = "moredetails"; </tag> <tag> out.MoreDetailsType = "review"; </tag> <tag> out.MoreDetailsOffset = rules.offsetrule.MoreDetailsOffset; </tag> 
+        </item>
+        <item> Next Results 
+          <tag> out.NextStep = "nextresult"; </tag>  <tag> out.MoreDetailsType = ""; </tag> <tag> out.MoreDetailsOffset = -1; </tag> 
+        </item>
+        <item> New Query 
+          <tag> out.NextStep = "newquery"; </tag> <tag> out.MoreDetailsType = ""; </tag> <tag> out.MoreDetailsOffset = -1; </tag> 
+        </item>
+      </one-of>
+  </rule>
+
+  <rule id="offsetrule" scope="public">
+      <one-of>
+        <item> One  <tag> out.MoreDetailsOffset = 1; </tag> </item>
+        <item> Two <tag> out.MoreDetailsOffset = 2; </tag> </item>
+        <item> Three <tag> out.MoreDetailsOffset = 3; </tag> </item>
       </one-of>
   </rule>
 
