@@ -1,0 +1,32 @@
+The project contains 3 files which are hosted in our Server in Google Compute Engine Platform.
+
+yelp.py
+-------
+This is the control point of the dialog application. It serves two purposes 
+
+- A basic HTTP server to serve GET requests from Voxeo client.
+- Also handles PUT requests containing Yelp search parameters.
+
+The python script handles all Yelp API calls and post processing of the JSON response.
+
+
+yelp_voice.xml
+--------------
+This file contains the voice XML for the application. It dictates the flow of the application.
+It accesses grammar.xml hosted by our Server to extract the required parameters for search.
+
+
+grammar.xml
+----------
+Thiss file describes allowed grammar for user utterances to search for a restaurant.
+
+
+How to run
+----------
+We are running the Server, so there is no extra step to start the project.
+
+
+Phone Number
+------------
+(206)316-8749 
+
