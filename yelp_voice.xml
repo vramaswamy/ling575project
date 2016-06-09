@@ -137,7 +137,16 @@
 
     <grammar src="http://104.197.18.43:8081/grammar.xml#nextsteprule" type="application/grammar-xml"/>
     <initial name="myInit2">
-       <prompt> <break strength="xweak" />  What do you want to do next? <break time="500" />  You can say more details about one or you can ask questions about any restaurant like  <break time="400" /> What is the address of two, what is the phone number of three, what is the customer rating of two, or what is the customer review for one. Also you can say Next Results, or New Query </prompt>
+       <prompt> <break strength="xweak" />  What do you want to do next? <break time="300" />
+       To retrieve more results you can say <break time="200" /> Next Results <break time="200" />
+       To start over a new query you can say <break time="200" /> New Query  <break time="200" /> 
+       Also You can use the restaurant number to ask for more details <break time="300" /> For example you can say <break time="200" /> 
+       What is the address of one <break time="300" />
+       What is the phone number of two <break time="300" />
+       What is the customer rating of three <break time="300" />
+       what is the customer review for three <break time="300" /> 
+       More details about three 
+     </prompt>
 
       <nomatch count="6">
         I did not recognize what you said.  Please try again.
