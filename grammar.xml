@@ -27,6 +27,7 @@
       <one-of repeat="0-1">
           <item> can you give me a suggestion for a restaurant </item>
           <item> can you give me a suggestion for a </item>
+          <item> can you give me a suggestion for an </item>
           <item> I am looking for a restaurant </item>
           <item> I am looking for a </item>
           <item> I am looking for an </item>

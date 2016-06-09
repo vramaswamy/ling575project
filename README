@@ -30,3 +30,28 @@ Phone Number
 ------------
 (206)316-8749 
 
+
+Usage Guidelines:
+----------------
+System: Welcome to Yelp, How can I help you ?
+Valid responses:
+-> I am looking for a restaurant
+-> I am looking for [a/an] [indian/mexican/thai/vietnamese] restaurant
+-> Can you give me a suggestion for a restaurant [near/at/in] [Redmond/Seattle/Kirkland]
+-> Can you give me a suggestion for a restaurant sort by [Best Matched/Distance/Highest Rated]
+-> I am looking for [a/an] [indian/mexican/thai/vietnamese] restaurant [near/at/in] [Redmond/Seattle/Kirkland] sort by [Best Matched/Distance/Highest Rated]
+
+System: // mentions the names of the restaurants matching the query
+System: What do you want to do next ?
+Valid responses:
+-> Next results
+-> New Query
+-> What is the address of [one/two/three]
+-> What is the phone number of [one/two/three]
+-> What is the customer rating of [one/two/three]
+-> What is the customer review for [one/two/three]
+-> More details about [one/two/three]
+
+To Exit say: [quit/exit/goodbye]
+
+
